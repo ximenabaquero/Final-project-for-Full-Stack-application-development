@@ -7,13 +7,13 @@
 # from django.contrib import messages
 # from datetime import datetime
 
+
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.models import User
 import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
-# from .populate import initiate
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -54,3 +54,42 @@ def logout_user(request):
         return JsonResponse(data, status=200)
 
     return JsonResponse({"status": "Bad request"}, status=400)
+@csrf_exempt
+def register_user(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            username   = body.get("userName")
+            password   = body.get("password")
+            first_name = body.get("firstName")
+            last_name  = body.get("lastName")
+            email      = body.get("email")
+        except Exception:
+            return JsonResponse({"status": False, "error": "Invalid JSON"}, status=400)
+
+        # If username already exists, return error expected by React
+        if User.objects.filter(username=username).exists():
+            return JsonResponse(
+                {"status": False, "error": "Already Registered"},
+                status=400
+            )
+
+        # Create the user
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=first_name or "",
+            last_name=last_name or "",
+            email=email or "",
+        )
+
+        # Log the user in
+        login(request, user)
+
+        # React expects `status` truthy and `userName`
+        return JsonResponse(
+            {"status": True, "userName": username},
+            status=201
+        )
+
+    return JsonResponse({"status": False, "error": "Bad request"}, status=400)

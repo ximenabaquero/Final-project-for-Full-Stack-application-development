@@ -12,4 +12,5 @@ urlpatterns = [
     # logout API (what your JS is calling: /djangoapp/logout)
     path('logout', views.logout_user, name='logout'),
     path('logout/', views.logout_user),  # extra, por si acaso
+    path('register', views.register_user, name='register'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
