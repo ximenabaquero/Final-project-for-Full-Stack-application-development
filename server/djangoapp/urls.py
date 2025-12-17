@@ -2,6 +2,8 @@ from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
 from . import views
+from django.views.generic import TemplateView
+
 
 app_name = 'djangoapp'
 
@@ -13,4 +15,5 @@ urlpatterns = [
     path('logout', views.logout_user, name='logout'),
     path('logout/', views.logout_user),  # extra, por si acaso
     path('register', views.register_user, name='register'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

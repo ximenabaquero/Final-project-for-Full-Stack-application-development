@@ -6,10 +6,17 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('djangoapp/', include('djangoapp.urls')),
+
+    # React SPA routes
+    path('dealers/', TemplateView.as_view(template_name="index.html")),
+
+    # App routes (API)
+    path('', include('djangoapp.urls')),
+
+    # Static template pages
     path('', TemplateView.as_view(template_name="Home.html")),
     path('about/', TemplateView.as_view(template_name="About.html")),
     path('contact/', TemplateView.as_view(template_name="Contact.html")),
     path('login/', TemplateView.as_view(template_name="index.html")),
-    path('register/', TemplateView.as_view(template_name="index.html")),  # ← ESTA
+    path('register/', TemplateView.as_view(template_name="index.html")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
