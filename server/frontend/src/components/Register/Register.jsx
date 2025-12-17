@@ -21,7 +21,7 @@ const Register = () => {
   // Handle form submission
   const register = async (e) => {
     e.preventDefault();
-    let register_url = window.location.origin + "/djangoapp/register";
+    let register_url = window.location.origin + "/djangoapp/register_api/";
 
     // Send POST request to register endpoint
     const res = await fetch(register_url, {
