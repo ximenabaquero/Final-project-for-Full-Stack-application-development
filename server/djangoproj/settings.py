@@ -30,11 +30,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    'saraximenagi-8000.theianext-0-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai'
+    '127.0.0.1',
+    '.proxy.cognitiveclass.ai',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://saraximenagi-8000.theianext-0-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai'
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://*.proxy.cognitiveclass.ai',
 ]
 
 REST_FRAMEWORK = {
