@@ -8,7 +8,7 @@ import Header from '../Header/Header';
 const PostReview = () => {
   const [dealer, setDealer] = useState({});
   const [review, setReview] = useState("");
-  const [model, setModel] = useState();
+  const [model, setModel] = useState("");
   const [year, setYear] = useState("");
   const [date, setDate] = useState("");
   const [carmodels, setCarmodels] = useState([]);
@@ -20,21 +20,31 @@ const PostReview = () => {
   let carmodels_url = `/djangoapp/get_cars`;
 
   const postreview = async ()=>{
-    let name = sessionStorage.getItem("firstname")+" "+sessionStorage.getItem("lastname");
-    //If the first and second name are stores as null, use the username
-    if(name.includes("null")) {
-      name = sessionStorage.getItem("username");
+    const username = sessionStorage.getItem("username");
+    if (!username) {
+      alert("Please login to post a review");
+      window.location.href = window.location.origin + "/login";
+      return;
     }
-    if(!model || review === "" || date === "" || year === "" || model === "") {
+
+    let firstName = sessionStorage.getItem("firstname");
+    let lastName = sessionStorage.getItem("lastname");
+    let name = `${firstName || ""} ${lastName || ""}`.trim();
+    if (!name || name.includes("null")) {
+      name = username;
+    }
+    if(!model || review === "" || date === "" || year === "") {
       alert("All details are mandatory")
       return;
     }
 
-    let model_split = model.split(" ");
-    let make_chosen = model_split[0];
-    let model_chosen = model_split[1];
+    const [make_chosen, model_chosen] = model.split("|");
+    if (!make_chosen || !model_chosen) {
+      alert("Please choose a car make and model")
+      return;
+    }
 
-    let jsoninput = JSON.stringify({
+    const jsoninput = JSON.stringify({
       "name": name,
       "dealership": id,
       "review": review,
@@ -45,20 +55,39 @@ const PostReview = () => {
       "car_year": year,
     });
 
-    console.log(jsoninput);
-    const res = await fetch(review_url, {
-      method: "POST",
-      headers: {
+    try {
+      const res = await fetch(review_url, {
+        method: "POST",
+        headers: {
           "Content-Type": "application/json",
-      },
-      body: jsoninput,
-  });
+        },
+        credentials: "same-origin",
+        body: jsoninput,
+      });
 
-  const json = await res.json();
-  if (json.status === 200) {
-      window.location.href = window.location.origin+"/dealer/"+id;
-  }
+      let json = null;
+      try {
+        json = await res.json();
+      } catch {
+        json = null;
+      }
 
+      if (!res.ok) {
+        const msg = json?.error || json?.status || `Request failed (${res.status})`;
+        alert(msg);
+        return;
+      }
+
+      if (json?.status === 200) {
+        window.location.href = window.location.origin+"/dealer/"+id;
+        return;
+      }
+
+      alert(json?.error || "Could not post review");
+    } catch (e) {
+      alert("Network error posting review");
+      console.error(e);
+    }
   }
   const get_dealer = async ()=>{
     const res = await fetch(dealer_url, {
@@ -99,16 +128,16 @@ const PostReview = () => {
       </div>
       <div className='input_field'>
       Car Make 
-      <select name="cars" id="cars" onChange={(e) => setModel(e.target.value)}>
-      <option value="" selected disabled hidden>Choose Car Make and Model</option>
+        <select name="cars" id="cars" value={model} onChange={(e) => setModel(e.target.value)}>
+        <option value="" disabled hidden>Choose Car Make and Model</option>
       {carmodels.map(carmodel => (
-          <option value={carmodel.CarMake+" "+carmodel.CarModel}>{carmodel.CarMake} {carmodel.CarModel}</option>
+          <option value={carmodel.CarMake+"|"+carmodel.CarModel}>{carmodel.CarMake} {carmodel.CarModel}</option>
       ))}
       </select>        
       </div >
 
       <div className='input_field'>
-      Car Year <input type="int" onChange={(e) => setYear(e.target.value)} max={2023} min={2015}/>
+        Car Year <input type="number" onChange={(e) => setYear(e.target.value)} max={2023} min={2015}/>
       </div>
 
       <div>
